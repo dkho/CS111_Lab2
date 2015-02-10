@@ -34,7 +34,7 @@
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_DESCRIPTION("CS 111 RAM Disk");
 // EXERCISE: Pass your names into the kernel as the module's authors.
-MODULE_AUTHOR("Skeletor");
+MODULE_AUTHOR("Daniel Kho (204315203) and Fan Hung (UID)");
 
 #define OSPRD_MAJOR	222
 
@@ -121,8 +121,27 @@ static void osprd_process_request(osprd_info_t *d, struct request *req)
 	// 'req->buffer' members, and the rq_data_dir() function.
 
 	// Your code here.
-	eprintk("Should process request...\n");
 
+	//MY NOTES:
+	// req->sector is the sector requested
+	// req->current_nr_sectors is the number of requested sectors
+	// req->buffer is the buffer to read or write into
+	// rq_data_dir(req) retursn READ or WRITE depending on what it needs to do
+
+	eprintk("Should process request...\n");
+	int numSects = (req->current_nr_sectors <= nsectors) ? req->current_nr_sectors : nsectors;
+	switch(rq_data_dir(req)){
+	case READ:
+	  {
+	  //need to copy data from d into req buffer
+	    memcpy(req->buffer,(d->data)+req->sector*SECTOR_SIZE,SECTOR_SIZE*numSects);
+	  }
+	case WRITE:
+	  {
+	  //need to copy data from req buffer into d
+	    memcpy((d->data)+req->sector*SECTOR_SIZE,req->buffer,SECTOR_SIZE*numSects);
+	  }
+	}
 	end_request(req, 1);
 }
 
